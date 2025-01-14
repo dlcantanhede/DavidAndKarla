@@ -3,6 +3,7 @@ from flask import jsonify
 from dateutil.relativedelta import relativedelta
 from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
+import pytz  # Importando o pytz para trabalhar com fusos horários
 
 app = Flask(__name__)
 
@@ -17,6 +18,9 @@ class RelationshipStartDate(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_date = db.Column(db.DateTime, nullable=False)
 
+# Definindo o fuso horário de São Paulo
+timezone = pytz.timezone('America/Sao_Paulo')
+
 # Rota principal
 @app.route('/')
 def home():
@@ -28,9 +32,11 @@ def home():
         db.session.add(relationship)
         db.session.commit()
 
+    # Ajusta o horário da data de início para o fuso horário correto
+    start_date = relationship.start_date.replace(tzinfo=pytz.utc).astimezone(timezone)
+
     # Calcula o tempo de namoro
-    start_date = relationship.start_date
-    now = datetime.now()
+    now = datetime.now(timezone)  # Agora também deve ser no fuso horário correto
     time_difference = now - start_date
 
     days_together = time_difference.days
@@ -52,8 +58,8 @@ def get_time():
     if not relationship:
         return jsonify(error="Data de relacionamento não encontrada"), 404
 
-    start_date = relationship.start_date
-    now = datetime.now()
+    start_date = relationship.start_date.replace(tzinfo=pytz.utc).astimezone(timezone)
+    now = datetime.now(timezone)
 
     # Calcula a diferença com relativedelta
     delta = relativedelta(now, start_date)
