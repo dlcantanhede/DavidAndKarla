@@ -28,12 +28,16 @@ def home():
     relationship = RelationshipStartDate.query.first()
     if not relationship:
         # Define uma data padrão se não houver registro no banco de dados
-        relationship = RelationshipStartDate(start_date=datetime(2022, 1, 14, 0, 0, 0))
+        relationship = RelationshipStartDate(
+            start_date=timezone.localize(datetime(2022, 1, 14, 0, 0, 0))
+        )
         db.session.add(relationship)
         db.session.commit()
 
     # Ajusta o horário da data de início para o fuso horário correto
-    start_date = relationship.start_date.replace(tzinfo=pytz.utc).astimezone(timezone)
+    start_date = relationship.start_date
+    if start_date.tzinfo is None:
+        start_date = start_date.replace(tzinfo=pytz.utc).astimezone(timezone)
 
     # Calcula o tempo de namoro
     now = datetime.now(timezone)  # Agora também deve ser no fuso horário correto
