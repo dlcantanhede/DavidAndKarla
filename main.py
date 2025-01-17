@@ -29,7 +29,7 @@ def home():
     if not relationship:
         # Define uma data padrão se não houver registro no banco de dados
         relationship = RelationshipStartDate(
-            start_date=timezone.localize(datetime(2022, 1, 14, 0, 0, 0))
+            start_date=timezone.localize(datetime(2022, 1, 15, 0, 0, 0))
         )
         db.session.add(relationship)
         db.session.commit()
